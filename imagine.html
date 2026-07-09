@@ -7,11 +7,15 @@
     <title>Archive Entry</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             background-color: black;
             color: white;
             font-family: "Courier New", monospace;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
 
             display: flex;
@@ -22,69 +26,50 @@
         }
 
         .message {
-
             width: 100%;
             max-width: 1000px;
-            margin-top: 20px;
-            padding: 5px;
-
-            font-size: 28px;
-            line-height: 1.5;
+            max-height: 90vh;
+            padding: 40px;
 
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
 
-            white-space: pre-wrap;
+            overflow-y: auto;
+        }
 
-            max-height: 90vh;
-            /* overflow-y: auto; */
+        .letter {
+            font-size: 48px;
+            margin-bottom: 30px;
+        }
+
+        pre {
+            margin: 0;
+            font: inherit;
+            font-size: 24px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
-    
+
     <div class="message">
 
-        <h2>I</h2>
-        
-        <p>Reveal the darkness within the fog.</p>
-        <p>The answer lies within a killer and a prey.</p>
-        </br>
-        <p>
-            "A young mystic, able to alter the trial with supernatural abilities." 1 5
-        </p>
-        <p>
-            "Heir to a great fortune, raised under a firm hand." 1 5
-        </p>
-        <p>
-            "Driven insane with the concept of purification after experiencing the horrors of the asylum." 5 8
-        </p>
-        <p>
-            "A quiet artist, standing steadfast against impossible odds." 1 6
-        </p>
-        <p>
-            "A rookie police officer who went beyond the call of duty during a certain crisis. He is known for his resourcefulness, tactical flashbangs, and incredible butt." 12
-        </p>
-        <p>
-            "A young mystic, able to alter the trial with supernatural abilities." 1 5
-        </p>
-        <p>
-            "Heir to a great fortune, raised under a firm hand." 1 5
-        </p>
-        <p>
-            "Driven insane with the concept of purification after experiencing the horrors of the asylum." 5 8
-        </p>
-        <p>
-            "A quiet artist, standing steadfast against impossible odds." 1 6
-        </p>
-        <p>
-            "A rookie police officer who went beyond the call of duty during a certain crisis. He is known for his resourcefulness, tactical flashbangs, and incredible butt." 12
-        </p>
+        <div class="letter">I</div>
 
-        
+<pre>Reveal the darkness within the fog.
+The answer lies within a killer and a prey.
+
+"A young mystic, able to alter the trial with supernatural abilities." 1 5
+"Heir to a great fortune, raised under a firm hand." 1 5
+"Driven insane with the concept of purification after experiencing the horrors of the asylum." 5 8
+"A quiet artist, standing steadfast against impossible odds." 1 6
+"A rookie police officer who went beyond the call of duty during a certain crisis. He is known for his resourcefulness, tactical flashbangs, and incredible butt." 12</pre>
+
     </div>
 
 </body>
