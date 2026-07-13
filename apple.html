@@ -26,6 +26,41 @@
             line-height: 1.8;
             max-width: 1000px;
         }
+
+        .input-section {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="text"] {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #222;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+            width: 300px;
+            max-width: 100%;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: "Courier New", monospace;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 
@@ -39,7 +74,14 @@
         </br>
         <p>Eerht Uoy Tem</p>
 
+        <div id="inputSection" class="input-section">
+            <input type="text" id="answerInput" placeholder="Enter your answer here...">
+            <button onclick="validateAnswer('apple')">Submit Answer</button>
+        </div>
+
     </div>
+
+    <script src="puzzle-system.js"></script>
 
 </body>
 

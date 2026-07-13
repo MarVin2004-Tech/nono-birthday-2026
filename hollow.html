@@ -26,6 +26,41 @@
             line-height: 1.8;
             max-width: 1000px;
         }
+
+        .input-section {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="text"] {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #222;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+            width: 300px;
+            max-width: 100%;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: "Courier New", monospace;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 
@@ -33,14 +68,18 @@
     
     <div class="message">
         
-        </br>
-        </br>
-        </br>
         <h2>H</h2>
 
         <p>00110011 00110011 00100000 00110001 00110010 00110001 00100000 00111001 00110111 00100000 00110001 00110000 00110000 00100000 00110001 00110000 00110100 00100000 00110001 00110001 00110110 00100000 00110001 00110001 00110100 00100000 00110001 00110000 00110101 00100000 00110110 00110110 00100000 00110011 00110010 00100000 00110001 00110010 00110001 00100000 00110001 00110001 00110010 00100000 00110001 00110001 00110010 00100000 00111001 00110111 00100000 00110111 00110010</p>
         
+        <div id="inputSection" class="input-section">
+            <input type="text" id="answerInput" placeholder="Enter your answer here...">
+            <button onclick="validateAnswer('hollow')">Submit Answer</button>
+        </div>
+        
     </div>
+
+    <script src="puzzle-system.js"></script>
 
 </body>
 

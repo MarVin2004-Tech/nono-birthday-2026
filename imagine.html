@@ -39,6 +39,41 @@
             overflow-y: auto;
         }
 
+        .input-section {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="text"] {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #222;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+            width: 300px;
+            max-width: 100%;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: "Courier New", monospace;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
         .letter {
             font-size: 48px;
             margin-bottom: 30px;
@@ -70,7 +105,14 @@ The answer lies within a killer and a prey.
 "A quiet artist, standing steadfast against impossible odds." 1 6
 "A rookie police officer who went beyond the call of duty during a certain crisis. He is known for his resourcefulness, tactical flashbangs, and incredible butt." 12</pre>
 
+        <div id="inputSection" class="input-section">
+            <input type="text" id="answerInput" placeholder="Enter your answer here...">
+            <button onclick="validateAnswer('imagine')">Submit Answer</button>
+        </div>
+
     </div>
+
+    <script src="puzzle-system.js"></script>
 
 </body>
 

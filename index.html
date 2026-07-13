@@ -26,6 +26,42 @@
             line-height: 1.6;
             max-width: 900px;
         }
+
+        .input-section {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        textarea {
+            padding: 12px;
+            font-size: 16px;
+            background-color: #222;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+            width: 400px;
+            max-width: 100%;
+            resize: vertical;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: "Courier New", monospace;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 
@@ -42,7 +78,97 @@
         <p>
             Individual access codes required.
         </p>
+
+        <!-- <br><br> -->
+
+        <div id="actionArea"></div>
     </div>
+
+    <script src="puzzle-system.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initUnlocks();
+            setupIndex();
+        });
+
+        function setupIndex() {
+            const actionArea = document.getElementById('actionArea');
+            
+            if (isPageUnlocked('hollow')) {
+                // Show message assembly area if hollow is unlocked
+                actionArea.innerHTML = `
+                    <div class="input-section" style="margin-top: 20px;">
+                        <p style="font-size: 18px; margin-bottom: 10px;">Piece together all your answers in the correct order:</p>
+                        <textarea id="finalMessageInput" placeholder="Type all your puzzle answers in the correct order..." style="height: 180px; width: 500px;"></textarea>
+                        <button onclick="validateFinalMessage()">Submit Final Message</button>
+                    </div>
+                    <div id="resultDiv"></div>
+                `;
+                
+                // Restore saved input
+                const input = document.getElementById('finalMessageInput');
+                if (input) {
+                    const saved = localStorage.getItem('finalMessage');
+                    if (saved) input.value = saved;
+                    
+                    input.addEventListener('input', function() {
+                        localStorage.setItem('finalMessage', this.value);
+                    });
+                }
+            } else {
+                // Show START button
+                actionArea.innerHTML = `<button id="startBtn" style="padding: 12px 30px; font-size: 18px; background-color: #333; color: white; border: 1px solid #666; border-radius: 4px; cursor: pointer; font-family: 'Courier New', monospace;">START</button>`;
+                
+                const startBtn = document.getElementById('startBtn');
+                startBtn.addEventListener('click', function() {
+                    unlockPage('hand');
+                    navigateToPage('hand');
+                });
+                startBtn.onmouseover = function() {
+                    this.style.backgroundColor = '#555';
+                };
+                startBtn.onmouseout = function() {
+                    this.style.backgroundColor = '#333';
+                };
+            }
+        }
+
+        function validateFinalMessage() {
+            const input = document.getElementById('finalMessageInput');
+            if (!input) return false;
+
+            const sanitize = (text) => text.toLowerCase().replace(/[.,!?;:\-'"]/g, '').replace(/\s+/g, ' ').trim();
+            const userMessage = sanitize(input.value);
+            const correctMessage = sanitize(COMPLETE_MESSAGE);
+
+            if (userMessage === correctMessage) {
+                alert('🎉 Congratulations! You have solved the puzzle!');
+                displayFinalKeys();
+                return true;
+            } else {
+                alert('Not quite right. Keep checking your answers and try again!');
+                return false;
+            }
+        }
+
+        function displayFinalKeys() {
+            const resultDiv = document.getElementById('resultDiv');
+            if (resultDiv) {
+                resultDiv.innerHTML = `
+                    <div style="margin-top: 40px; padding: 20px; border: 2px solid #00ff00; border-radius: 4px; background-color: #1a2a1a;">
+                        <h3 style="color: #00ff00; margin-top: 0;">🎮 Your Game Keys 🎮</h3>
+                        <p style="color: #d0d0d0;">Here are your redeemable Steam game keys:</p>
+                        <div style="background-color: #0a0a0a; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                            <p style="margin: 10px 0; color: #00ff00; font-family: 'Courier New', monospace; font-size: 16px;">0L57A-0WX0V-JJYB7</p>
+                            <p style="margin: 10px 0; color: #00ff00; font-family: 'Courier New', monospace; font-size: 16px;">IDW02-VC4XL-QGVBG</p>
+                        </div>
+                        <p style="color: #ffcc00; margin-top: 15px; font-size: 13px;">⚠️ If these keys don't work, please message me!</p>
+                        <p style="color: #aaa; margin-top: 10px; font-size: 14px;">Enjoy your games! 🎉</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
 
 </body>
 
