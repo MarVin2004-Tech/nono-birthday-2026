@@ -535,25 +535,14 @@ function displayGameKeys() {
         return;
     }
 
-    // Not signed in: show a small form to request sign-in link or choose Google sign-in
+    // Not signed in: show only Google sign-in
     keysDiv.innerHTML = `
         <div style="margin:20px auto 0; max-width:420px; text-align:center;">
-            <p style="margin:0 0 12px 0; color:#ddd; font-size:14px; line-height:1.4;">To securely retrieve your keys, use one of the sign-in methods below:</p>
-            <input id="signInEmailInput" placeholder="friend@example.com" style="width:100%; padding:10px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; font-family:'Courier New', monospace;" />
-            <div style="margin-top:12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-                <button id="sendSignInBtn" style="flex:1 1 150px; min-width:130px; padding:8px 12px; background:#334; color:#fff; border-radius:4px; border:1px solid #556; cursor:pointer;">Send Sign-in Link</button>
-                <button id="googleSignInBtn" style="flex:1 1 150px; min-width:130px; padding:8px 12px; background:#1a73e8; color:#fff; border-radius:4px; border:1px solid #1662c4; cursor:pointer;">Sign in with Google</button>
-            </div>
-            <button id="cancelSignInBtn" style="margin-top:12px; padding:8px 12px; background:#222; color:#fff; border-radius:4px; border:1px solid #444; cursor:pointer;">Cancel</button>
-            <p style="color:#999; font-size:12px; margin-top:10px;">The sign-in link will be sent to the email you provide. The recipient must open that email to complete sign-in.</p>
+            <p style="margin:0 0 12px 0; color:#ddd; font-size:14px; line-height:1.4;">Sign in with Google to securely retrieve your keys.</p>
+            <button id="googleSignInBtn" style="width:100%; padding:12px 16px; background:#1a73e8; color:#fff; border-radius:6px; border:1px solid #1662c4; cursor:pointer; font-size:16px;">Sign in with Google</button>
+            <p style="color:#999; font-size:12px; margin-top:10px;">Use the authorized Google account to view your rewards.</p>
         </div>
     `;
 
-    document.getElementById('sendSignInBtn').onclick = () => {
-        const email = document.getElementById('signInEmailInput').value.trim();
-        if (!email) { showModal('Please enter an email.'); return; }
-        sendSignInLink(email);
-    };
     document.getElementById('googleSignInBtn').onclick = () => { signInWithGoogle(); };
-    document.getElementById('cancelSignInBtn').onclick = () => { keysDiv.innerHTML = ''; };
 }
