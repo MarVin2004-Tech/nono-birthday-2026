@@ -84,6 +84,9 @@
         <div id="actionArea"></div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <script src="puzzle-system.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -142,30 +145,23 @@
             const correctMessage = sanitize(COMPLETE_MESSAGE);
 
             if (userMessage === correctMessage) {
-                alert('🎉 Congratulations! You have solved the puzzle!');
+                showModal('🎉 Congratulations! You have solved the puzzle!');
+                // fetch and display final keys via Firebase-protected endpoint/doc
                 displayFinalKeys();
                 return true;
             } else {
-                alert('Not quite right. Keep checking your answers and try again!');
+                showModal('Not quite right. Keep checking your answers and try again!');
                 return false;
             }
         }
 
         function displayFinalKeys() {
-            const resultDiv = document.getElementById('resultDiv');
-            if (resultDiv) {
-                resultDiv.innerHTML = `
-                    <div style="margin-top: 40px; padding: 20px; border: 2px solid #00ff00; border-radius: 4px; background-color: #1a2a1a;">
-                        <h3 style="color: #00ff00; margin-top: 0;">🎮 Your Game Keys 🎮</h3>
-                        <p style="color: #d0d0d0;">Here are your redeemable Steam game keys:</p>
-                        <div style="background-color: #0a0a0a; padding: 15px; border-radius: 4px; margin-top: 15px;">
-                            <p style="margin: 10px 0; color: #00ff00; font-family: 'Courier New', monospace; font-size: 16px;">0L57A-0WX0V-JJYB7</p>
-                            <p style="margin: 10px 0; color: #00ff00; font-family: 'Courier New', monospace; font-size: 16px;">IDW02-VC4XL-QGVBG</p>
-                        </div>
-                        <p style="color: #ffcc00; margin-top: 15px; font-size: 13px;">⚠️ If these keys don't work, please message me!</p>
-                        <p style="color: #aaa; margin-top: 10px; font-size: 14px;">Enjoy your games! 🎉</p>
-                    </div>
-                `;
+            // Delegates to the secure keys display function (requires Firebase setup).
+            if (typeof displayGameKeys === 'function') {
+                displayGameKeys();
+            } else {
+                const resultDiv = document.getElementById('resultDiv');
+                if (resultDiv) resultDiv.innerHTML = '<p style="color:#ffcc00">Keys are not available — owner must configure Firebase.</p>';
             }
         }
     </script>

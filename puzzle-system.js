@@ -5,6 +5,136 @@ const PAGE_LABELS = {
     index: 'Home'
 };
 
+// Firebase config placeholder - create a Firebase project and replace these values
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAAnn5snmVUPua3gJXpPVENw7vHt4yAYX4",
+  authDomain: "nono-bday-present-2026.firebaseapp.com",
+  databaseURL: "https://nono-bday-present-2026-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "nono-bday-present-2026",
+  storageBucket: "nono-bday-present-2026.firebasestorage.app",
+  messagingSenderId: "906557661256",
+  appId: "1:906557661256:web:eb4a3f04c129edd1d9b87d"
+};
+
+// Optional: set intended recipient emails here only as a convenience.
+// The real security must be enforced by Firestore rules and by the email-link sign-in flow.
+const FIREBASE_ALLOWED_EMAILS = [];
+
+let _firebaseInitialized = false;
+
+function initFirebaseIfNeeded() {
+    if (typeof firebase === 'undefined') return false;
+    if (_firebaseInitialized) return true;
+    try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        _firebaseInitialized = true;
+        return true;
+    } catch (e) {
+        console.error('Firebase init error', e);
+        return false;
+    }
+}
+
+function sendSignInLink(email) {
+    if (!initFirebaseIfNeeded()) { showModal('Firebase is not configured.'); return; }
+    const actionCodeSettings = {
+        // The link will bring the user back to the same page to complete sign-in
+        url: window.location.href,
+        handleCodeInApp: true
+    };
+    firebase.auth().sendSignInLinkToEmail(email, actionCodeSettings)
+        .then(() => {
+            localStorage.setItem('emailForSignIn', email);
+            showModal('Sign-in link sent to ' + email + '. Check your email to complete sign-in.');
+        })
+        .catch(err => {
+            console.error(err);
+            showModal('Error sending sign-in link: ' + (err && err.message));
+        });
+}
+
+function handleSignInLinkOnLoad() {
+    if (!initFirebaseIfNeeded()) return;
+    const auth = firebase.auth();
+    if (auth.isSignInWithEmailLink(window.location.href)) {
+        let email = localStorage.getItem('emailForSignIn');
+        if (!email) {
+            email = window.prompt('Please confirm your email to complete sign-in:');
+        }
+        if (!email) {
+            showModal('Email required to complete sign-in.');
+            return;
+        }
+        auth.signInWithEmailLink(email, window.location.href)
+            .then((result) => {
+                localStorage.removeItem('emailForSignIn');
+                showModal('Signed in as ' + (result.user && result.user.email) + '.');
+                // After sign-in, fetch keys if appropriate
+                fetchAndDisplayKeys();
+            })
+            .catch(err => {
+                console.error(err);
+                showModal('Sign-in error: ' + (err && err.message));
+            });
+    }
+}
+
+function fetchAndDisplayKeys() {
+    if (!initFirebaseIfNeeded()) { showModal('Firebase not configured.'); return; }
+    const auth = firebase.auth();
+    const user = auth.currentUser;
+    if (!user) {
+        showModal('You must sign in to retrieve the keys.');
+        return;
+    }
+
+    const db = firebase.firestore();
+    db.collection('secrets').doc('gameKeys').get()
+        .then(doc => {
+            if (!doc.exists) {
+                showModal('No keys found in Firestore.');
+                return;
+            }
+            const data = doc.data() || {};
+            let allowedEmails = [];
+            if (Array.isArray(data.allowedEmail)) {
+                allowedEmails = data.allowedEmail;
+            } else if (typeof data.allowedEmail === 'string') {
+                allowedEmails = [data.allowedEmail];
+            }
+            if (!allowedEmails.length) {
+                // If Firestore does not declare allowed email(s), fall back to an optional client-side list.
+                allowedEmails = FIREBASE_ALLOWED_EMAILS;
+            }
+            const userEmail = (user.email || '').toLowerCase();
+            const normalizedAllowed = allowedEmails.map(e => (e || '').toLowerCase());
+            if (!normalizedAllowed.includes(userEmail)) {
+                showModal('This account is not authorized to view the keys.');
+                return;
+            }
+            const keys = data.keys || [];
+            const keysDiv = document.getElementById('gameKeysDiv');
+            if (!keysDiv) return;
+            if (!keys.length) {
+                keysDiv.innerHTML = '<p style="color:#ffcc00">No keys stored.</p>';
+                return;
+            }
+            keysDiv.innerHTML = `
+                <div style="margin-top: 20px; padding: 16px; border: 2px solid #00ff00; border-radius: 6px; background-color: #101814;">
+                    <h3 style="color: #00ff00; margin-top: 0;">🎮 Your Game Keys 🎮</h3>
+                    <div style="background-color: #0a0a0a; padding: 12px; border-radius: 4px; margin-top: 12px;">
+                        ${keys.map(k => `<p style=\"margin:8px 0;color:#00ff00;font-family:'Courier New', monospace;font-size:16px;\">${k}</p>`).join('')}
+                    </div>
+                    <p style="color:#ffcc00; margin-top:12px; font-size:13px;">If these keys don't work, contact the gift sender.</p>
+                </div>
+            `;
+        })
+        .catch(err => {
+            console.error(err);
+            showModal('Failed to fetch keys: ' + (err && err.message));
+        });
+}
+
 // Define correct answers for each puzzle page (case-insensitive)
 const ANSWERS = {
     hand: 'hello nono',
@@ -89,21 +219,19 @@ function validateAnswer(currentPage) {
             const nextPage = PAGES[currentIndex + 1];
             unlockPage(nextPage);
             
-            // Show success message and redirect after slight delay
-            alert('Correct! Next page unlocked.');
-            setTimeout(() => {
+            // Show success message and redirect after user closes the message
+            showModal('Correct! Next page unlocked.', true, () => {
                 window.location.href = nextPage + '.html';
-            }, 500);
+            });
         } else {
-            // Final page reached - redirect to index
-            alert('You have completed all puzzles! Now go back to the Home Page to piece them together.');
-            setTimeout(() => {
+            // Final page reached - redirect to index after user closes the message
+            showModal('You have completed all puzzles! Now go back to the Home Page to piece them together.', true, () => {
                 window.location.href = 'index.html';
-            }, 1000);
+            });
         }
         return true;
     } else {
-        alert('Incorrect. Try again.');
+        showModal('Incorrect. Try again.');
         input.value = '';
         return false;
     }
@@ -122,6 +250,63 @@ function displayAnswer(pageName) {
     `;
 }
 
+let modalTimeout = null;
+let modalCallback = null;
+
+function showModal(message, autoClose = true, callback = null) {
+    let modal = document.getElementById('puzzleModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'puzzleModal';
+        modal.style.cssText = `
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 2000;
+        `;
+        modal.innerHTML = `
+            <div style="max-width: 90%; width: 420px; background: #111; border: 1px solid #444; border-radius: 12px; padding: 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.45); font-family: 'Courier New', monospace;">
+                <div id="puzzleModalMessage" style="color: #eee; font-size: 16px; line-height: 1.5; white-space: pre-wrap;"></div>
+                <button id="puzzleModalClose" style="margin-top: 22px; padding: 10px 18px; background: #333; color: #fff; border: 1px solid #666; border-radius: 6px; cursor: pointer; font-family: 'Courier New', monospace; font-size: 14px;">OK</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('#puzzleModalClose').addEventListener('click', closeModal);
+    }
+
+    modal.querySelector('#puzzleModalMessage').textContent = message;
+    modal.style.display = 'flex';
+    modalCallback = callback;
+
+    if (modalTimeout) {
+        clearTimeout(modalTimeout);
+        modalTimeout = null;
+    }
+
+    if (autoClose) {
+        modalTimeout = setTimeout(closeModal, 3200);
+    }
+}
+
+function closeModal() {
+    const modal = document.getElementById('puzzleModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    if (modalTimeout) {
+        clearTimeout(modalTimeout);
+        modalTimeout = null;
+    }
+    if (typeof modalCallback === 'function') {
+        const callback = modalCallback;
+        modalCallback = null;
+        callback();
+    }
+}
+
 function addBottomPadding() {
     const message = document.querySelector('.message');
     if (message) {
@@ -134,7 +319,7 @@ function navigateToPage(pageName) {
     if (isPageUnlocked(pageName)) {
         window.location.href = pageName + '.html';
     } else {
-        alert('This page is locked. Complete the previous puzzles to unlock it.');
+        showModal('This page is locked. Complete the previous puzzles to unlock it.');
     }
 }
 
@@ -225,6 +410,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (currentPage === 'hollow') {
         setupCompleteMessageInput();
     }
+
+    // If a Firebase email-link sign-in was used, complete it here
+    try { handleSignInLinkOnLoad(); } catch (e) { /* ignore if firebase not present */ }
 });
 
 // Validate complete message and show keys
@@ -239,11 +427,11 @@ function validateCompleteMessage() {
     const correctMessage = sanitize(COMPLETE_MESSAGE);
 
     if (userMessage === correctMessage) {
-        alert('🎉 Congratulations! You have solved the puzzle!');
+        showModal('🎉 Congratulations! You have solved the puzzle!');
         displayGameKeys();
         return true;
     } else {
-        alert('Not quite right. Keep checking your answers and try again!');
+        showModal('Not quite right. Keep checking your answers and try again!');
         return false;
     }
 }
@@ -299,18 +487,45 @@ function setupCompleteMessageInput() {
 // Display game keys
 function displayGameKeys() {
     const keysDiv = document.getElementById('gameKeysDiv');
-    if (keysDiv) {
-        keysDiv.innerHTML = `
-            <div style="margin-top: 40px; padding: 20px; border: 2px solid #00ff00; border-radius: 4px; background-color: #1a2a1a;">
-                <h3 style="color: #00ff00; margin-top: 0;">🎮 Your Game Keys 🎮</h3>
-                <p style="color: #d0d0d0;">Here are your redeemable Steam game keys:</p>
-                <div style="background-color: #0a0a0a; padding: 15px; border-radius: 4px; margin-top: 15px;">
-                    <p style="margin: 10px 0; color: #00ff00; font-family: 'Courier New', monospace; font-size: 16px;">0L57A-0WX0V-JJYB7</p>
-                    <p style="margin: 10px 0; color: #00ff00; font-family: 'Courier New', monospace; font-size: 16px;">IDW02-VC4XL-QGVBG</p>
-                </div>
-                <p style="color: #ffcc00; margin-top: 15px; font-size: 13px;">⚠️ If these keys don't work, please message me!</p>
-                <p style="color: #aaa; margin-top: 10px; font-size: 14px;">Enjoy your games! 🎉</p>
-            </div>
-        `;
+    if (!keysDiv) return;
+
+    // If FIREBASE_CONFIG has not been filled in, show message and fallback
+    if (!FIREBASE_CONFIG || FIREBASE_CONFIG.apiKey === 'REPLACE_WITH_YOUR_FIREBASE_API_KEY') {
+        keysDiv.innerHTML = '<p style="color:#ffcc00">Keys are not available — owner must configure Firebase.</p>';
+        return;
     }
+
+    // Ensure Firebase is initialized
+    if (!initFirebaseIfNeeded()) {
+        keysDiv.innerHTML = '<p style="color:#ff6666">Unable to initialize Firebase. Check console for details.</p>';
+        return;
+    }
+
+    const auth = firebase.auth();
+    const user = auth.currentUser;
+    if (user) {
+        // Already signed in: fetch from Firestore
+        fetchAndDisplayKeys();
+        return;
+    }
+
+    // Not signed in: show a small form to request sign-in link
+    keysDiv.innerHTML = `
+        <div style="margin-top:20px; max-width:420px;">
+            <p style="margin:0 0 8px 0; color:#ddd;">To securely retrieve your keys, enter the email that will receive a sign-in link:</p>
+            <input id="signInEmailInput" placeholder="friend@example.com" style="width:100%; padding:8px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; font-family:'Courier New', monospace;" />
+            <div style="margin-top:10px; display:flex; gap:8px;">
+                <button id="sendSignInBtn" style="flex:0 0 auto; padding:8px 12px; background:#334; color:#fff; border-radius:4px; border:1px solid #556; cursor:pointer;">Send Sign-in Link</button>
+                <button id="cancelSignInBtn" style="flex:1 1 auto; padding:8px 12px; background:#222; color:#fff; border-radius:4px; border:1px solid #444; cursor:pointer;">Cancel</button>
+            </div>
+            <p style="color:#999; font-size:12px; margin-top:10px;">The sign-in link will be sent to the email you provide. The recipient must open that email to complete sign-in.</p>
+        </div>
+    `;
+
+    document.getElementById('sendSignInBtn').onclick = () => {
+        const email = document.getElementById('signInEmailInput').value.trim();
+        if (!email) { showModal('Please enter an email.'); return; }
+        sendSignInLink(email);
+    };
+    document.getElementById('cancelSignInBtn').onclick = () => { keysDiv.innerHTML = ''; };
 }
