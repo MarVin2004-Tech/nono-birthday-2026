@@ -1,6 +1,9 @@
 // Puzzle System - Manages navigation, unlocking, and answer validation
 
 const PAGES = ['index', 'hand', 'birch', 'toy', 'apple', 'river', 'young', 'imagine', 'plan', 'hollow'];
+const PAGE_LABELS = {
+    index: 'Home'
+};
 
 // Define correct answers for each puzzle page (case-insensitive)
 const ANSWERS = {
@@ -93,7 +96,7 @@ function validateAnswer(currentPage) {
             }, 500);
         } else {
             // Final page reached - redirect to index
-            alert('You have completed all puzzles! Now go back to index to piece them together.');
+            alert('You have completed all puzzles! Now go back to the Home Page to piece them together.');
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1000);
@@ -112,11 +115,18 @@ function displayAnswer(pageName) {
     if (!inputSection) return;
     
     inputSection.innerHTML = `
-        <div style="margin-top: 20px; padding: 12px; border: 1px solid #555; border-radius: 4px; background-color: #1a1a1a;">
-            <p style="margin: 0; color: #888; font-size: 14px;">Your answer:</p>
+        <div style="margin-top: 20px; padding: 10px 12px; border: 1px solid #555; border-radius: 4px; background-color: #2a2a2a;">
+            <p style="margin: 0; color: #aaa; font-size: 14px;">Your answer:</p>
             <p style="font-size: 18px; color: #d0d0d0; font-weight: bold; margin: 5px 0;">${ANSWERS[pageName]}</p>
         </div>
     `;
+}
+
+function addBottomPadding() {
+    const message = document.querySelector('.message');
+    if (message) {
+        message.style.paddingBottom = '120px';
+    }
 }
 
 // Navigate to a page (with unlock check)
@@ -165,22 +175,25 @@ function createNavBar() {
     
     // Add navigation buttons for unlocked pages
     PAGES.forEach(page => {
-        if (page !== currentPage && unlocked[page]) {
+        if (unlocked[page]) {
             const btn = document.createElement('button');
-            btn.textContent = page.charAt(0).toUpperCase() + page.slice(1);
+            const label = PAGE_LABELS[page] || page.charAt(0).toUpperCase();
+            btn.textContent = label;
             btn.style.cssText = `
                 padding: 8px 16px;
-                background-color: #333;
+                background-color: ${page === currentPage ? '#222' : '#333'};
                 color: white;
-                border: 1px solid #666;
+                border: 1px solid ${page === currentPage ? '#888' : '#666'};
                 border-radius: 4px;
-                cursor: pointer;
+                cursor: ${page === currentPage ? 'default' : 'pointer'};
                 font-family: "Courier New", monospace;
                 font-size: 14px;
             `;
-            btn.onclick = () => navigateToPage(page);
-            btn.onmouseover = () => btn.style.backgroundColor = '#555';
-            btn.onmouseout = () => btn.style.backgroundColor = '#333';
+            if (page !== currentPage) {
+                btn.onclick = () => navigateToPage(page);
+                btn.onmouseover = () => btn.style.backgroundColor = '#555';
+                btn.onmouseout = () => btn.style.backgroundColor = '#333';
+            }
             navBar.appendChild(btn);
         }
     });
@@ -198,13 +211,14 @@ document.addEventListener('DOMContentLoaded', function() {
         displayAnswer(currentPage);
     }
     
-    // Create nav bar for all pages except initial index
-    if (isPageUnlocked('hollow')) {
-        // If hollow is unlocked, show nav bar on all pages
+    // Create nav bar for all unlocked pages
+    if (currentPage !== 'index' || isPageUnlocked('hollow')) {
         createNavBar();
-    } else if (currentPage !== 'index') {
-        // Otherwise only show on puzzle pages
-        createNavBar();
+    }
+
+    // Add bottom padding so there is extra scroll space
+    if (currentPage !== 'index') {
+        addBottomPadding();
     }
     
     // If on hollow page, set up complete message input
