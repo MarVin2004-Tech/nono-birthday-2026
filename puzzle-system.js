@@ -67,6 +67,23 @@ function signInWithGoogle() {
         });
 }
 
+function signOut() {
+    if (!initFirebaseIfNeeded()) { showModal('Firebase is not configured.'); return; }
+    firebase.auth().signOut()
+        .then(() => {
+            showModal('You have been signed out.');
+            const keysDiv = document.getElementById('gameKeysDiv');
+            if (keysDiv) {
+                keysDiv.innerHTML = '';
+            }
+            displayGameKeys();
+        })
+        .catch(err => {
+            console.error(err);
+            showModal('Sign out failed: ' + (err && err.message));
+        });
+}
+
 function handleSignInLinkOnLoad() {
     if (!initFirebaseIfNeeded()) return;
     const auth = firebase.auth();
@@ -140,8 +157,15 @@ function fetchAndDisplayKeys() {
                         ${keys.map(k => `<p style=\"margin:8px 0;color:#00ff00;font-family:'Courier New', monospace;font-size:16px;\">${k}</p>`).join('')}
                     </div>
                     <p style="color:#ffcc00; margin-top:12px; font-size:13px;">If these keys don't work, contact the gift sender.</p>
+                    <button id="logoutBtn" style="margin-top:16px; padding:10px 16px; background:#222; color:#fff; border:1px solid #555; border-radius:4px; cursor:pointer;">Log out</button>
                 </div>
             `;
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.onclick = () => {
+                    signOut();
+                };
+            }
         })
         .catch(err => {
             console.error(err);
