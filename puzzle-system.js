@@ -109,7 +109,7 @@ function fetchAndDisplayKeys() {
             const userEmail = (user.email || '').toLowerCase();
             const normalizedAllowed = allowedEmails.map(e => (e || '').toLowerCase());
             if (!normalizedAllowed.includes(userEmail)) {
-                showModal('This account is not authorized to view the keys.');
+                showModal('Incorrect email. Please try a different one, or message me if the problem persists.');
                 return;
             }
             const keys = data.keys || [];
@@ -486,7 +486,19 @@ function setupCompleteMessageInput() {
 
 // Display game keys
 function displayGameKeys() {
-    const keysDiv = document.getElementById('gameKeysDiv');
+    let keysDiv = document.getElementById('gameKeysDiv');
+    let resultDiv = document.getElementById('resultDiv');
+    if (!resultDiv) {
+        const actionArea = document.getElementById('actionArea');
+        if (actionArea) {
+            actionArea.insertAdjacentHTML('beforeend', '<div id="resultDiv"><div id="gameKeysDiv"></div></div>');
+            resultDiv = document.getElementById('resultDiv');
+        }
+    }
+    if (!keysDiv && resultDiv) {
+        resultDiv.innerHTML = '<div id="gameKeysDiv"></div>';
+        keysDiv = document.getElementById('gameKeysDiv');
+    }
     if (!keysDiv) return;
 
     // If FIREBASE_CONFIG has not been filled in, show message and fallback
@@ -511,12 +523,12 @@ function displayGameKeys() {
 
     // Not signed in: show a small form to request sign-in link
     keysDiv.innerHTML = `
-        <div style="margin-top:20px; max-width:420px;">
-            <p style="margin:0 0 8px 0; color:#ddd;">To securely retrieve your keys, enter the email that will receive a sign-in link:</p>
-            <input id="signInEmailInput" placeholder="friend@example.com" style="width:100%; padding:8px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; font-family:'Courier New', monospace;" />
-            <div style="margin-top:10px; display:flex; gap:8px;">
+        <div style="margin:20px auto 0; max-width:420px; text-align:center;">
+            <p style="margin:0 0 12px 0; color:#ddd; font-size:14px; line-height:1.4;">To securely retrieve your keys, enter the email that will receive a sign-in link:</p>
+            <input id="signInEmailInput" placeholder="friend@example.com" style="width:100%; padding:10px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; font-family:'Courier New', monospace;" />
+            <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
                 <button id="sendSignInBtn" style="flex:0 0 auto; padding:8px 12px; background:#334; color:#fff; border-radius:4px; border:1px solid #556; cursor:pointer;">Send Sign-in Link</button>
-                <button id="cancelSignInBtn" style="flex:1 1 auto; padding:8px 12px; background:#222; color:#fff; border-radius:4px; border:1px solid #444; cursor:pointer;">Cancel</button>
+                <button id="cancelSignInBtn" style="flex:0 0 auto; padding:8px 12px; background:#222; color:#fff; border-radius:4px; border:1px solid #444; cursor:pointer;">Cancel</button>
             </div>
             <p style="color:#999; font-size:12px; margin-top:10px;">The sign-in link will be sent to the email you provide. The recipient must open that email to complete sign-in.</p>
         </div>

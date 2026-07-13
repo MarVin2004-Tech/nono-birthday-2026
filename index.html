@@ -146,6 +146,15 @@
 
             if (userMessage === correctMessage) {
                 showModal('🎉 Congratulations! You have solved the puzzle!');
+                const actionArea = document.getElementById('actionArea');
+                if (actionArea) {
+                    actionArea.innerHTML = `
+                        <div style="margin-top:20px;">
+                            <p style="color:#aaf;">Sign in to see your rewards below.</p>
+                            <div id="resultDiv"><div id="gameKeysDiv"></div></div>
+                        </div>
+                    `;
+                }
                 // fetch and display final keys via Firebase-protected endpoint/doc
                 displayFinalKeys();
                 return true;
